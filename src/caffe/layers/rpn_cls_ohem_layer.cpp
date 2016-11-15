@@ -43,8 +43,15 @@ namespace caffe {
     CHECK_EQ(bottom[1]->height(), height_);
     CHECK_EQ(bottom[1]->width(), width_);
 
+	CHECK_EQ(bottom[2]->num(), num_);          // 1
+    bbox_channels_ = bottom[2]->channels();   // 4*7
+    CHECK_EQ(bottom[2]->height(), height_/7); // hei
+    CHECK_EQ(bottom[2]->width(), width_);     // width
+
     // Labels for scoring
     top[0]->Reshape(num_, 1, height_, width_);  // 1(num) X 1(ch) X (7*hei) X wid
+    // Loss weights for bbox regression
+    top[1]->Reshape(num_, bbox_channels_, height_ / 7, width_);// 1(num) X 4*7(ch) X hei X wid
   }
 
   template <typename Dtype>

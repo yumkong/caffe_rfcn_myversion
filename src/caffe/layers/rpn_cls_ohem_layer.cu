@@ -1,8 +1,5 @@
 // ------------------------------------------------------------------
-// R-FCN
-// Copyright (c) 2016 Microsoft
-// Licensed under The MIT License [see r-fcn/LICENSE for details]
-// Written by Yi Li
+// Written by Yuguang Liu
 // ------------------------------------------------------------------
 
 #include <algorithm>
@@ -21,8 +18,11 @@ namespace caffe {
     //bottom_rois is a pointer pointing to the 1st element of the matrix bottom[0]
     const Dtype* bottom_loss = bottom[0]->cpu_data(); // 1(num) x 1(ch) x 7*hei x wid 
     const Dtype* bottom_labels = bottom[1]->cpu_data(); // 1(num) x 1(ch) x 7*hei x wid 
+    const Dtype* bottom_bbox_loss_weights = bottom[2]->cpu_data();// 1(num) X 4*7(ch) X hei X wid
     Dtype* top_labels = top[0]->mutable_cpu_data();    // 1(num) x 1(ch) x 7*hei x wid 
+    Dtype* top_bbox_loss_weights = top[1]->mutable_cpu_data();
     caffe_set(top[0]->count(), Dtype(ignore_label_), top_labels); // init labels_ohem to -1
+    caffe_set(top[1]->count(), Dtype(0), top_bbox_loss_weights); // init bbox_weights to 0
 
     int num_anchors_ = bottom[0]->count();// num of all elements
 
@@ -56,8 +56,13 @@ namespace caffe {
 		{
 		     if (fg_left > 0) // if this image still has quota
 		     {
-			fg_left--;
-			top_labels[index] = bottom_labels[index]; 
+				fg_left--;
+				top_labels[index] = bottom_labels[index]; 
+				for (int j = 0; j < 4; j++) //copy bbox weights from bottom to top
+				{
+					int bbox_index = index * 4 + j;
+					top_bbox_loss_weights[bbox_index] = bottom_bbox_loss_weights[bbox_index];
+				}
 		     }
 		}
 		else

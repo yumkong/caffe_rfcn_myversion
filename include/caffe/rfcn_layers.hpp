@@ -115,10 +115,10 @@ namespace caffe {
     virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
 
-    virtual inline const char* type() const { return "BoxAnnotatorOHEM"; }
+    virtual inline const char* type() const { return "RpnClsOHEM"; }
 
-    virtual inline int ExactNumBottomBlobs() const { return 2; } // 4
-    virtual inline int ExactNumTopBlobs() const { return 1; } // 2
+    virtual inline int ExactNumBottomBlobs() const { return 3; } // 4
+    virtual inline int ExactNumTopBlobs() const { return 2; } // 2
 
   protected:
     virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
@@ -134,7 +134,7 @@ namespace caffe {
     int height_;
     int width_;
     int spatial_dim_;
-    //int bbox_channels_;
+    int bbox_channels_;
 
     int bg_per_img_;
     int ignore_label_;
