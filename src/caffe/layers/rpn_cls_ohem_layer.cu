@@ -60,7 +60,8 @@ namespace caffe {
 				top_labels[index] = bottom_labels[index]; 
 				for (int j = 0; j < 4; j++) //copy bbox weights from bottom to top
 				{
-					int bbox_index = index * 4 + j;
+					//int bbox_index = index * 4 + j;
+					int bbox_index = j * spatial_dim_ + index;
 					top_bbox_loss_weights[bbox_index] = bottom_bbox_loss_weights[bbox_index];
 				}
 		     }
