@@ -47,6 +47,8 @@ namespace caffe {
     ////std::vector<int> second (4,100);                       // four ints with value 100
     int fg_left = bg_per_img_ / 4; // number_left(2, 128)==> 2 ints with value 128
     int bg_left = bg_per_img_ - fg_left;
+	// 1115 added
+	int single_hei = height_ / 7;
     for (int i = 0; i < num_anchors_; i++)
 	{
 		int index = sorted_idx[i];
@@ -58,10 +60,14 @@ namespace caffe {
 		     {
 				fg_left--;
 				top_labels[index] = bottom_labels[index]; 
+				int anchor_idx = index / width_ / 7;
+				int hei_idx = index / width_ % 7;
+				int wid_idx = index % width;
 				for (int j = 0; j < 4; j++) //copy bbox weights from bottom to top
 				{
 					//int bbox_index = index * 4 + j;
-					int bbox_index = j * spatial_dim_ + index;
+					//int bbox_index = j * spatial_dim_ + index;
+					int bbox_index = single_hei * width_ * 4 * anchor_idx + single_hei * width_ * j + width_*hei_idx+wid_idx;
 					top_bbox_loss_weights[bbox_index] = bottom_bbox_loss_weights[bbox_index];
 				}
 		     }
