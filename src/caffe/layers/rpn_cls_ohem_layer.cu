@@ -18,7 +18,7 @@ namespace caffe {
     //bottom_rois is a pointer pointing to the 1st element of the matrix bottom[0]
     const Dtype* bottom_loss = bottom[0]->cpu_data(); // 1(num) x 1(ch) x 7*hei x wid 
     const Dtype* bottom_labels = bottom[1]->cpu_data(); // 1(num) x 1(ch) x 7*hei x wid 
-    const Dtype* bottom_bbox_loss_weights = bottom[2]->cpu_data();// 1(num) X 4*7(ch) X hei X wid
+    const Dtype* bottom_bbox_loss_weights = bottom[2]->cpu_data();// 1(num) x 4*7(ch) x hei x wid
     Dtype* top_labels = top[0]->mutable_cpu_data();    // 1(num) x 1(ch) x 7*hei x wid 
     Dtype* top_bbox_loss_weights = top[1]->mutable_cpu_data();
     caffe_set(top[0]->count(), Dtype(ignore_label_), top_labels); // init labels_ohem to -1
