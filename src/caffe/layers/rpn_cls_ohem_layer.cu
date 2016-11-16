@@ -60,8 +60,11 @@ namespace caffe {
 		     {
 				fg_left--;
 				top_labels[index] = bottom_labels[index]; 
-				int anchor_idx = index / width_ % 7;
-				int hei_idx = index / width_ / 7;
+				//int anchor_idx = index / width_ % 7;
+				//int hei_idx = index / width_ / 7;
+				int anchor_idx = index / width_ / single_hei;
+				int hei_idx = index / width_ % single_hei;
+
 				int wid_idx = index % width_;
 				for (int j = 0; j < 4; j++) //copy bbox weights from bottom to top
 				{
