@@ -47,7 +47,9 @@ namespace caffe {
       [bottom_loss](int i1, int i2){return bottom_loss[i1] > bottom_loss[i2]; });
 
     // 1116 added For debug purpose: using built-in random generator to randomly shuffle sorted_idx
+    int random_shuffle_num = std::floor(random_shuffle_percent_ * num_anchors_);
     //std::random_shuffle ( sorted_idx.begin(), sorted_idx.end() );
+    std::random_shuffle ( sorted_idx.begin(), sorted_idx.begin() + random_shuffle_num );
     // Generate output labels for cls and loss_weights for bbox regression
     ////std::vector<int> second (4,100);                       // four ints with value 100
     int fg_left = bg_per_img_ / 4; // number_left(2, 128)==> 2 ints with value 128

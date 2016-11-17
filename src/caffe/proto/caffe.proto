@@ -526,6 +526,7 @@ message BoxAnnotatorOHEMParameter {
 
 message RpnClsOHEMParameter {
   required uint32 bg_per_img = 1; // number of bg rois for training
+  required float random_shuffle_percent = 0.3; // shuffle the first random_shuffle_percent part of anchors losses
   optional int32 ignore_label = 2 [default = -1]; // ignore_label in scoring
 }
 

@@ -26,6 +26,8 @@ namespace caffe {
     RpnClsOHEMParameter rpn_cls_param = this->layer_param_.rpn_cls_ohem_param();
     bg_per_img_ = rpn_cls_param.bg_per_img();  //256
     CHECK_GT(bg_per_img_, 0);
+	random_shuffle_percent_ = rpn_cls_param.random_shuffle_percent();  //0.3
+	CHECK_GT(random_shuffle_percent_, 0);
     ignore_label_ = rpn_cls_param.ignore_label(); // -1
   }
 
