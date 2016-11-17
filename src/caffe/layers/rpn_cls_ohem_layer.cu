@@ -19,10 +19,13 @@ namespace caffe {
     const Dtype* bottom_loss = bottom[0]->cpu_data(); // 1(num) x 1(ch) x 7*hei x wid 
     const Dtype* bottom_labels = bottom[1]->cpu_data(); // 1(num) x 1(ch) x 7*hei x wid 
     const Dtype* bottom_bbox_loss_weights = bottom[2]->cpu_data();// 1(num) x 4*7(ch) x hei x wid
+    const Dtype* bottom_labels_weight = bottom[3]->cpu_data(); // 1(num) x 1(ch) x 7*hei x wid 
     Dtype* top_labels = top[0]->mutable_cpu_data();    // 1(num) x 1(ch) x 7*hei x wid 
     Dtype* top_bbox_loss_weights = top[1]->mutable_cpu_data();
+	Dtype* top_labels_weight = top[2]->mutable_cpu_data(); 
     caffe_set(top[0]->count(), Dtype(ignore_label_), top_labels); // init labels_ohem to -1
     caffe_set(top[1]->count(), Dtype(0), top_bbox_loss_weights); // init bbox_weights to 0
+    caffe_set(top[2]->count(), Dtype(0), top_labels_weight); // init label_weights to 0
 
     int num_anchors_ = bottom[0]->count();// num of all elements
 
@@ -60,6 +63,7 @@ namespace caffe {
 		     {
 				fg_left--;
 				top_labels[index] = bottom_labels[index]; 
+				top_labels_weight[index] = bottom_labels_weight[index]; 
 				//int anchor_idx = index / width_ % 7;
 				//int hei_idx = index / width_ / 7;
 				int anchor_idx = index / width_ / single_hei;
@@ -83,6 +87,7 @@ namespace caffe {
 				// the corresponding top_label is set to the value of the bottom label in the same position
 				//(all other position are init to -1)
 				top_labels[index] = bottom_labels[index]; 
+				top_labels_weight[index] = bottom_labels_weight[index]; 
 			}
 		}
     }

@@ -13,8 +13,9 @@ __global__ void SoftmaxLossForwardGPU(const int nthreads,
           const int num, const int dim, const int spatial_dim,
           const bool has_ignore_label_, const int ignore_label_,
           Dtype* counts) {
+   // num == outer_num_,  spatial_dim == inner_num_
   CUDA_KERNEL_LOOP(index, nthreads) {
-    const int n = index / spatial_dim;
+    const int n = index / spatial_dim; // always 0 here
     const int s = index % spatial_dim;
     const int label_value = static_cast<int>(label[n * spatial_dim + s]);
     if (has_ignore_label_ && label_value == ignore_label_) {
@@ -22,6 +23,7 @@ __global__ void SoftmaxLossForwardGPU(const int nthreads,
       counts[index] = 0;
     } else {
       const Dtype weight_value = (weight != NULL) ? static_cast<Dtype>(weight[n * spatial_dim + s]) : 1;
+	  // loss is always positive, the lower the prob is, the larger the loss is.
       loss[index] = - weight_value * log(max(prob_data[n * dim + label_value * spatial_dim + s],
                       Dtype(FLT_MIN)));
       counts[index] = weight_value;
@@ -123,7 +125,7 @@ void SoftmaxWithLossLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
                << " Layer cannot backpropagate to label inputs.";
   }
   if (propagate_down[0]) {
-    Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
+    Dtype* bottom_diff = bottom[0]->mutable_gpu_diff(); // loss_data: entropy loss of each position
     const Dtype* prob_data = prob_.gpu_data();
     const Dtype* top_data = top[0]->gpu_data();
     caffe_gpu_memcpy(prob_.count() * sizeof(Dtype), prob_data, bottom_diff);

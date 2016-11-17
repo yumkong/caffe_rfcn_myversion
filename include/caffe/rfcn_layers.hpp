@@ -117,8 +117,8 @@ namespace caffe {
 
     virtual inline const char* type() const { return "RpnClsOHEM"; }
 
-    virtual inline int ExactNumBottomBlobs() const { return 3; } // 4
-    virtual inline int ExactNumTopBlobs() const { return 2; } // 2
+    virtual inline int ExactNumBottomBlobs() const { return 4; } // 4
+    virtual inline int ExactNumTopBlobs() const { return 3; } // 2
 
   protected:
     virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
