@@ -97,12 +97,23 @@ namespace caffe {
 	}
 	//1118 4/3: sort sorted_idx in bottom_loss_mirror's ascending order
 	std::sort(sorted_idx.begin(), sorted_idx.end(),
-      			[bottom_loss_mirror_ptr](int i1, int i2){return bottom_loss_mirror_ptr[i1] < bottom_loss_mirror_ptr[i2]; });
+      			[bottom_loss_mirror_ptr](int i1, int i2){return bottom_loss_mirror_ptr[i1] > bottom_loss_mirror_ptr[i2]; });
 	//1118 5/3: get the first element's idx larger than 0
-	std::vector<int>::iterator up;
-    up = std::upper_bound (sorted_idx.begin(), sorted_idx.end(), 0); // 
-    int random_shuffle_num = (int)(sorted_idx.end() - up)*random_shuffle_percent_;
-	LOG(INFO) << "first non-zero idx = " << (int)(sorted_idx.begin() - up) << ", random_shuffle_num = " << random_shuffle_num;
+	//std::vector<int>::iterator up;
+    //up = std::upper_bound (sorted_idx.begin(), sorted_idx.end(), 0); // 
+    //int random_shuffle_num = (int)(sorted_idx.end() - up)*random_shuffle_percent_;
+    int random_shuffle_num = 0;
+	for (int k = 0; k < num_anchors_; k++)
+	{
+	    // keep the index of the first element <= 0.01
+		if(bottom_loss_mirror_ptr[sorted_idx[k]] <= 0.01)
+		{
+			random_shuffle_num = k;
+			break;
+		}	
+	}
+	random_shuffle_num = (int)(random_shuffle_num*random_shuffle_percent_);
+	LOG(INFO) << "first <=0.01 idx = " << random_shuffle_num << ", random_shuffle_num = " << random_shuffle_num;
 	//1118 5/3: inverse sorted_idx
 	std::reverse(sorted_idx.begin(),sorted_idx.end());
 	LOG(INFO) << "Before shuffle: loss[0] = " << bottom_loss_mirror_ptr[sorted_idx[0]] << ", loss[10] = "<< bottom_loss_mirror_ptr[sorted_idx[10]]
