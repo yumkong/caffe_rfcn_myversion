@@ -112,10 +112,10 @@ namespace caffe {
 			break;
 		}	
 	}
+	LOG(INFO) << "first <=0.0001 idx = " << random_shuffle_num;
 	random_shuffle_num = (int)(random_shuffle_num*random_shuffle_percent_);
-	LOG(INFO) << "first <=0.01 idx = " << random_shuffle_num << ", random_shuffle_num = " << random_shuffle_num;
 	//1118 5/3: inverse sorted_idx
-	std::reverse(sorted_idx.begin(),sorted_idx.end());
+	//std::reverse(sorted_idx.begin(),sorted_idx.end());
 	LOG(INFO) << "Before shuffle: loss[0] = " << bottom_loss_mirror_ptr[sorted_idx[0]] << ", loss[10] = "<< bottom_loss_mirror_ptr[sorted_idx[10]]
 			  <<", loss[100] = "<< bottom_loss_mirror_ptr[sorted_idx[100]];  // check whether in descending order
 	//1118 6/3: shuffle the first random_shuffle_percent_ of sorted_idx's non-zero elements
@@ -139,7 +139,7 @@ namespace caffe {
 		int index = sorted_idx[i];
 		//int s = index % (width_*height_); // x % 1 == 0
 		//int n = index / (width_*height_); // x / 1 == x
-		if (bottom_labels[index] > 0) //if fg, directly copy the label value from bottom to top
+		if (bottom_labels[index] == 1) //if fg, directly copy the label value from bottom to top
 		{
 		     if (fg_left > 0) // if this image still has quota
 		     {
@@ -161,7 +161,7 @@ namespace caffe {
 				}
 		     }
 		}
-		else
+		else if (bottom_labels[index] == 0)
 		{   //if bg, only copy the first bg_per_img_ label values from bottom to top, ignore others (-1) 
 			if (bg_left > 0) // if this image still has quota
 			{
