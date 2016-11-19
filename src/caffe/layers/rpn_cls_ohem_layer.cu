@@ -102,15 +102,15 @@ namespace caffe {
 	std::vector<int>::iterator up;
     up = std::upper_bound (sorted_idx.begin(), sorted_idx.end(), 0); // 
     int random_shuffle_num = (int)(sorted_idx.end() - up)*random_shuffle_percent_;
-	LOG(INFO) << "random_shuffle_num = " << random_shuffle_num;
+	LOG(INFO) << "first non-zero idx = " << (int)(sorted_idx.begin() - up) << ", random_shuffle_num = " << random_shuffle_num;
 	//1118 5/3: inverse sorted_idx
 	std::reverse(sorted_idx.begin(),sorted_idx.end());
-	LOG(INFO) << "Before shuffle: loss0 = " << bottom_loss[sorted_idx[0]] << ", loss[10] = "<< bottom_loss[sorted_idx[10]]
-			  <<", loss[100] = "<< bottom_loss[sorted_idx[100]];  // check whether in descending order
+	LOG(INFO) << "Before shuffle: loss[0] = " << bottom_loss_mirror_ptr[sorted_idx[0]] << ", loss[10] = "<< bottom_loss_mirror_ptr[sorted_idx[10]]
+			  <<", loss[100] = "<< bottom_loss_mirror_ptr[sorted_idx[100]];  // check whether in descending order
 	//1118 6/3: shuffle the first random_shuffle_percent_ of sorted_idx's non-zero elements
 	std::random_shuffle ( sorted_idx.begin(), sorted_idx.begin() + random_shuffle_num );
-	LOG(INFO) << "After shuffle: loss0 = " << bottom_loss[sorted_idx[0]] << ", loss[10] = "<< bottom_loss[sorted_idx[10]]
-			  <<", loss[100] = "<< bottom_loss[sorted_idx[100]];
+	LOG(INFO) << "After shuffle: loss[0] = " << bottom_loss_mirror_ptr[sorted_idx[0]] << ", loss[10] = "<< bottom_loss_mirror_ptr[sorted_idx[10]]
+			  <<", loss[100] = "<< bottom_loss_mirror_ptr[sorted_idx[100]];
 
 	//std::sort(sorted_idx.begin(), sorted_idx.end(),
     //  			[bottom_loss](int i1, int i2){return bottom_loss[i1] > bottom_loss[i2]; });
