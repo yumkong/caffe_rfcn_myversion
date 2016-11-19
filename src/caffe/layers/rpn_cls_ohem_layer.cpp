@@ -61,6 +61,9 @@ namespace caffe {
     top[1]->Reshape(num_, bbox_channels_, height_ / 7, width_);// 1(num) X 4*7(ch) X hei X wid
     // Label weights for scoring
     top[2]->Reshape(num_, 1, height_, width_);  // 1(num) X 1(ch) X (7*hei) X wid
+
+	bottom_loss_mirror_.Reshape(bottom[0]->num(), bottom[0]->channels(),
+      				 bottom[0]->height(), bottom[0]->width());
   }
 
   template <typename Dtype>

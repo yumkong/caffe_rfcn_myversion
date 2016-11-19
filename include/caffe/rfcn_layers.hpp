@@ -139,6 +139,8 @@ namespace caffe {
     int bg_per_img_;
     int ignore_label_;
 	float random_shuffle_percent_;
+
+	Blob<Dtype> bottom_loss_mirror_;
   };
 
 }  // namespace caffe

@@ -23,6 +23,10 @@ namespace caffe {
     Dtype* top_labels = top[0]->mutable_cpu_data();    // 1(num) x 1(ch) x 7*hei x wid 
     Dtype* top_bbox_loss_weights = top[1]->mutable_cpu_data();
 	Dtype* top_labels_weight = top[2]->mutable_cpu_data(); 
+	//1118 added
+	Dtype* bottom_loss_mirror_ptr = bottom_loss_mirror_.mutable_cpu_data();
+	caffe_set(bottom[0]->count(), Dtype(0), bottom_loss_mirror_ptr); // init label_weights to 0
+	
     caffe_set(top[0]->count(), Dtype(ignore_label_), top_labels); // init labels_ohem to -1
     caffe_set(top[1]->count(), Dtype(0), top_bbox_loss_weights); // init bbox_weights to 0
     caffe_set(top[2]->count(), Dtype(0), top_labels_weight); // init label_weights to 0
@@ -43,19 +47,82 @@ namespace caffe {
 	//similarly, the below is also to sort sorted_idx in descending order, the result is 
 	// bottom_loss[sorted_idx[0]] > bottom_loss[sorted_idx[1]] > ... > bottom_loss[sorted_idx[end]] 
 	// as a result, the beginning of the sorted index contains the largest [loss_cls + loss_bbox] error
-    std::sort(sorted_idx.begin(), sorted_idx.end(),
-      [bottom_loss](int i1, int i2){return bottom_loss[i1] > bottom_loss[i2]; });
-
-    // 1116 added For debug purpose: using built-in random generator to randomly shuffle sorted_idx
-    int random_shuffle_num = std::floor(random_shuffle_percent_ * num_anchors_);
-    //std::random_shuffle ( sorted_idx.begin(), sorted_idx.end() );
-    std::random_shuffle ( sorted_idx.begin(), sorted_idx.begin() + random_shuffle_num );
-    // Generate output labels for cls and loss_weights for bbox regression
-    ////std::vector<int> second (4,100);                       // four ints with value 100
-    int fg_left = bg_per_img_ / 4; // number_left(2, 128)==> 2 ints with value 128
+	int fg_left = bg_per_img_ / 4; // number_left(2, 128)==> 2 ints with value 128
     int bg_left = bg_per_img_ - fg_left;
 	// 1115 added
+	int anchor_num = 7;
 	int single_hei = height_ / 7;
+	int single_area = single_hei * width_;
+	//1118 1/3: only keep the max out of 7 anchors
+	for(int k = 0; k < single_area; k++)
+	{
+		int tmp_idx = 0;
+		int tmp_max = bottom_loss[k];
+		for(int kk = 1; kk < anchor_num; kk++)
+		{
+			if(bottom_loss[k + kk*single_area] > tmp_max)
+			{
+				tmp_max = bottom_loss[k + kk*single_area];
+				tmp_idx = kk;
+			}
+		}
+		// only save the largest loss value out of 7 anchors of the same position, others set to 0
+		bottom_loss_mirror_ptr[k + tmp_idx*single_area] = bottom_loss[k + tmp_idx*single_area];
+	}
+	//1118 2/3: width-wise nms
+	for(int k = 0; k < height_; k++)
+	{
+		int start_idx = k * width_;
+		for (int w_idx = 1; w_idx < width_-1; w_idx ++)
+		{
+			if(bottom_loss_mirror_ptr[start_idx+w_idx] <= bottom_loss_mirror_ptr[start_idx+w_idx-1] 
+				|| bottom_loss_mirror_ptr[start_idx+w_idx] <= bottom_loss_mirror_ptr[start_idx+w_idx+1])
+			{	bottom_loss_mirror_ptr[start_idx+w_idx] = 0; }
+		}
+	}
+	//1118 3/3: height-wise nms
+	for( int k = 0; k < anchor_num; k++ )
+	{
+		int start_idx1 = k * single_area;
+		for (int h_idx = 1; h_idx < single_hei - 1; h_idx++)
+		{
+			int start_idx2 = start_idx1 + h_idx * width_;
+			for (int w_idx = 0; w_idx < width_; w_idx ++)
+			{
+				if(bottom_loss_mirror_ptr[start_idx2+w_idx] <= bottom_loss_mirror_ptr[start_idx2+w_idx-width_] 
+					|| bottom_loss_mirror_ptr[start_idx2+w_idx] <= bottom_loss_mirror_ptr[start_idx2+w_idx+width_])
+				{	bottom_loss_mirror_ptr[start_idx2+w_idx] = 0; }
+			}
+		}
+	}
+	//1118 4/3: sort sorted_idx in bottom_loss_mirror's ascending order
+	std::sort(sorted_idx.begin(), sorted_idx.end(),
+      			[bottom_loss_mirror_ptr](int i1, int i2){return bottom_loss_mirror_ptr[i1] < bottom_loss_mirror_ptr[i2]; });
+	//1118 5/3: get the first element's idx larger than 0
+	std::vector<int>::iterator up;
+    up = std::upper_bound (sorted_idx.begin(), sorted_idx.end(), 0); // 
+    int random_shuffle_num = (int)(sorted_idx.end() - up)*random_shuffle_percent_;
+	LOG(INFO) << "random_shuffle_num = " << random_shuffle_num;
+	//1118 5/3: inverse sorted_idx
+	std::reverse(sorted_idx.begin(),sorted_idx.end());
+	LOG(INFO) << "Before shuffle: loss0 = " << bottom_loss[sorted_idx[0]] << ", loss[10] = "<< bottom_loss[sorted_idx[10]]
+			  <<", loss[100] = "<< bottom_loss[sorted_idx[100]];  // check whether in descending order
+	//1118 6/3: shuffle the first random_shuffle_percent_ of sorted_idx's non-zero elements
+	std::random_shuffle ( sorted_idx.begin(), sorted_idx.begin() + random_shuffle_num );
+	LOG(INFO) << "After shuffle: loss0 = " << bottom_loss[sorted_idx[0]] << ", loss[10] = "<< bottom_loss[sorted_idx[10]]
+			  <<", loss[100] = "<< bottom_loss[sorted_idx[100]];
+
+	//std::sort(sorted_idx.begin(), sorted_idx.end(),
+    //  			[bottom_loss](int i1, int i2){return bottom_loss[i1] > bottom_loss[i2]; });
+	//1117 added to get the 
+	// necessary???
+    // 1116 added For debug purpose: using built-in random generator to randomly shuffle sorted_idx
+    //int random_shuffle_num = std::floor(random_shuffle_percent_ * num_anchors_);
+    //std::random_shuffle ( sorted_idx.begin(), sorted_idx.end() );
+    //std::random_shuffle ( sorted_idx.begin(), sorted_idx.begin() + random_shuffle_num );
+    // Generate output labels for cls and loss_weights for bbox regression
+    ////std::vector<int> second (4,100);                       // four ints with value 100
+    
     for (int i = 0; i < num_anchors_; i++)
 	{
 		int index = sorted_idx[i];
