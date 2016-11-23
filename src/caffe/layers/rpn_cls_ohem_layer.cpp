@@ -26,6 +26,8 @@ namespace caffe {
     RpnClsOHEMParameter rpn_cls_param = this->layer_param_.rpn_cls_ohem_param();
     bg_per_img_ = rpn_cls_param.bg_per_img();  //256
     CHECK_GT(bg_per_img_, 0);
+	anchor_num_ = rpn_cls_param.anchor_num();
+	CHECK_GT(anchor_num_, 0);
 	random_shuffle_percent_ = rpn_cls_param.random_shuffle_percent();  //0.3
 	CHECK_GT(random_shuffle_percent_, 0);
     ignore_label_ = rpn_cls_param.ignore_label(); // -1
@@ -47,7 +49,7 @@ namespace caffe {
 
 	CHECK_EQ(bottom[2]->num(), num_);          // 1
     bbox_channels_ = bottom[2]->channels();   // 4*7
-    CHECK_EQ(bottom[2]->height(), height_/7); // hei
+    CHECK_EQ(bottom[2]->height(), height_/anchor_num_); // hei
     CHECK_EQ(bottom[2]->width(), width_);     // width
 
 	CHECK_EQ(bottom[3]->num(), num_);
@@ -58,7 +60,7 @@ namespace caffe {
     // Labels for scoring
     top[0]->Reshape(num_, 1, height_, width_);  // 1(num) X 1(ch) X (7*hei) X wid
     // Loss weights for bbox regression
-    top[1]->Reshape(num_, bbox_channels_, height_ / 7, width_);// 1(num) X 4*7(ch) X hei X wid
+    top[1]->Reshape(num_, bbox_channels_, height_ / anchor_num_, width_);// 1(num) X 4*7(ch) X hei X wid
     // Label weights for scoring
     top[2]->Reshape(num_, 1, height_, width_);  // 1(num) X 1(ch) X (7*hei) X wid
 

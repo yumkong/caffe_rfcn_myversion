@@ -164,6 +164,7 @@
     <ClCompile Include="..\..\src\caffe\layers\slice_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\smooth_L1_loss_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\IoU_loss_layer.cpp" />
+	<ClCompile Include="..\..\src\caffe\layers\normalize_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\softmax_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\softmax_loss_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\split_layer.cpp" />
@@ -270,6 +271,7 @@
     <ClInclude Include="..\..\include\caffe\layers\slice_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\softmax_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\softmax_loss_layer.hpp" />
+	<ClInclude Include="..\..\include\caffe\layers\normalize_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\split_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\spp_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\tanh_layer.hpp" />
@@ -371,6 +373,7 @@
     <CudaCompile Include="..\..\src\caffe\layers\roi_pooling_layer.cu" />
     <CudaCompile Include="..\..\src\caffe\layers\smooth_L1_loss_layer.cu" />
     <CudaCompile Include="..\..\src\caffe\layers\IoU_loss_layer.cu" />
+	<CudaCompile Include="..\..\src\caffe\layers\normalize_layer.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(SolutionDir)\CommonSettings.targets" />

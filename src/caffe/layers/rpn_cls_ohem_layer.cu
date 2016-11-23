@@ -50,8 +50,8 @@ namespace caffe {
 	int fg_left = bg_per_img_ / 4; // number_left(2, 128)==> 2 ints with value 128
     int bg_left = bg_per_img_ - fg_left;
 	// 1115 added
-	int anchor_num = 7;
-	int single_hei = height_ / 7;
+	int anchor_num = anchor_num_;
+	int single_hei = height_ / anchor_num;
 	int single_area = single_hei * width_;
 	//1118 1/3: only keep the max out of 7 anchors
 	for(int k = 0; k < single_area; k++)
@@ -106,7 +106,7 @@ namespace caffe {
 	for (int k = 0; k < num_anchors_; k++)
 	{
 	    // keep the index of the first element <= 0.01
-		if(bottom_loss_mirror_ptr[sorted_idx[k]] <= 0.01)
+		if(bottom_loss_mirror_ptr[sorted_idx[k]] <= 0.0001)
 		{
 			random_shuffle_num = k;
 			break;
