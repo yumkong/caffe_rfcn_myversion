@@ -137,10 +137,11 @@ namespace caffe {
     int bbox_channels_;
 
     int bg_per_img_;
+    int anchor_num_;
     int ignore_label_;
-	float random_shuffle_percent_;
+    float random_shuffle_percent_;
 
-	Blob<Dtype> bottom_loss_mirror_;
+    Blob<Dtype> bottom_loss_mirror_;
   };
 
 }  // namespace caffe

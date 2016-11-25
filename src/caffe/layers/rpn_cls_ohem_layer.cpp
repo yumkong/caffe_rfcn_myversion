@@ -47,12 +47,12 @@ namespace caffe {
     CHECK_EQ(bottom[1]->height(), height_);
     CHECK_EQ(bottom[1]->width(), width_);
 
-	CHECK_EQ(bottom[2]->num(), num_);          // 1
+    CHECK_EQ(bottom[2]->num(), num_);          // 1
     bbox_channels_ = bottom[2]->channels();   // 4*7
     CHECK_EQ(bottom[2]->height(), height_/anchor_num_); // hei
     CHECK_EQ(bottom[2]->width(), width_);     // width
 
-	CHECK_EQ(bottom[3]->num(), num_);
+    CHECK_EQ(bottom[3]->num(), num_);
     CHECK_EQ(bottom[3]->channels(), 1);
     CHECK_EQ(bottom[3]->height(), height_);
     CHECK_EQ(bottom[3]->width(), width_);
